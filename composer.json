@@ -1,6 +1,6 @@
 {
     "name": "rcrowe/Swift_PostmarkTransport",
-    "description": "Sending emails with SwiftMailer using Postmark as the transport",
+    "description": "Send emails with SwiftMailer using Postmark as the transport",
     "homepage": "https://github.com/rcrowe/Swift_PostmarkTransport",
     "keywords": ["swiftmailer", "postmark", "email"],
     "authors": [
