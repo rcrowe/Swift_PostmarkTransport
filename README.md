@@ -2,6 +2,8 @@
 
 Send emails with [SwiftMailer](http://) using [Postmark](http://postmarkapp.com) as the transport.
 
+Original author: Øystein Riiser Gundersen <oysteinrg@gmail.com>
+
 ## Package installation
 
 The Postmark transport is provided as Composer package which can be installed by adding the package to your composer.json file:
@@ -9,7 +11,7 @@ The Postmark transport is provided as Composer package which can be installed by
 ```javascript
 {
     "require": {
-        "rcrowe\Swift_PostmarkTransport": "*"
+        "rcrowe\Swift_PostmarkTransport": "dev-master"
     }
 }
 ```
