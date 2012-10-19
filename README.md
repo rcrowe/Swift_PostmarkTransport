@@ -16,6 +16,7 @@ The Postmark transport is provided as Composer package which can be installed by
 
 ## Usage
 
+```php
 $transport = Swift_PostmarkTransport::newInstance('POSTMARK_API_KEY');
 $mailer    = Swift_Mailer::newInstance($transport);
 
@@ -25,3 +26,4 @@ $message = Swift_Message::newInstance('Subjebt')
                 ->setBody('This can be any text from the web app');
 
 $mailer->send($message);
+```
