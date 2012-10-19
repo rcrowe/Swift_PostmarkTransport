@@ -1,0 +1,22 @@
+{
+    "name": "rcrowe/Swift_PostmarkTransport",
+    "description": "Sending emails with SwiftMailer using Postmark as the transport",
+    "homepage": "https://github.com/rcrowe/Swift_PostmarkTransport",
+    "keywords": ["swiftmailer", "postmark", "email"],
+    "authors": [
+        {
+            "name": "Rob Crowe",
+            "email": "hello@vivalacrowe.com"
+        }
+    ],
+    "type": "library",
+    "require": {
+        "php": ">=5.2.4"
+    },
+    "require-dev": {
+        "swiftmailer/swiftmailer": "4.2.*"
+    },
+    "autoload": {
+        "files": ["src/Swift/Transport/Postmark.php"]
+    }
+}
