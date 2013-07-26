@@ -1,8 +1,10 @@
 <?php
-/**
- * @licence http://www.opensource.org/licenses/bsd-license.php New BSD Licence
- * @author Øystein Riiser Gundersen <oysteinrg@gmail.com>
- */
+namespace rcrowe\Swift\Transport;
+
+use Swift_Events_EventListener;
+use Swift_Mime_HeaderSet;
+use Swift_Mime_Message;
+use Swift_TransportException;
 
 /**
  * A SwiftMailer transport implementation for the
@@ -24,11 +26,8 @@
  *      ->setBody('Here is the message itself');
  *    $mailer->send($message);
  * </code>
- *
- * @package Swift
- * @subpackage Postmark
  */
-class Swift_PostmarkTransport implements Swift_Transport
+class Postmark implements \Swift_Transport
 {
     /**
      * @var string
@@ -70,17 +69,17 @@ class Swift_PostmarkTransport implements Swift_Transport
 
     public static function newInstance($postmark_api_token, $from = NULL, $postmark_uri = NULL)
     {
-        return new Swift_PostmarkTransport($postmark_api_token, $from, $postmark_uri);
+        return new self($postmark_api_token, $from, $postmark_uri);
     }
 
-    public function isStarted() { return false; }
+    public function isStarted() { return FALSE; }
     public function start() { }
     public function stop() { }
 
     /**
      * @param Swift_Mime_Message $message
      * @param string $mime_type
-     * @return Swift_Mime_MimePart
+     * @return \Swift_Mime_MimePart
      */
     protected function getMIMEPart(Swift_Mime_Message $message, $mime_type)
     {
@@ -113,7 +112,7 @@ class Swift_PostmarkTransport implements Swift_Transport
         {
             if ($headers->has($header_name))
             {
-                throw new Swift_PostmarkTransportException(
+                throw new Swift_TransportException(
                     "Postmark does not support the '{$header_name}' header"
                 );
             }
@@ -144,9 +143,11 @@ class Swift_PostmarkTransport implements Swift_Transport
         // ReplyTo
         $reply_to = array();
 
-        foreach ($message->getReplyTo() as $email => $name)
-        {
-            $reply_to[] = ($name !== NULL) ? sprintf("%s <%s>", $name, $email) : $email;
+        if (is_array($message->getReplyTo())) {
+            foreach ($message->getReplyTo() as $email => $name)
+            {
+                $reply_to[] = ($name !== NULL) ? sprintf("%s <%s>", $name, $email) : $email;
+            }
         }
 
         $message_data['ReplyTo'] = implode(',', $reply_to);
@@ -196,22 +197,22 @@ class Swift_PostmarkTransport implements Swift_Transport
 
         curl_setopt_array($curl, array(
             CURLOPT_URL            => self::POSTMARK_URI,
-            CURLOPT_POST           => true,
+            CURLOPT_POST           => TRUE,
             CURLOPT_HTTPHEADER     => $this->headers(),
             CURLOPT_POSTFIELDS     => json_encode($message_data),
-            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_RETURNTRANSFER => TRUE,
         ));
 
         $response = curl_exec($curl);
 
-        if ($response === false)
+        if ($response === FALSE)
         {
             $this->fail('Postmark delivery failed: ' . curl_error($curl));
         }
 
         $response_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        return array($response_code, @json_decode($response, true));
+        return array($response_code, @json_decode($response, TRUE));
     }
 
     protected function fail($message)
