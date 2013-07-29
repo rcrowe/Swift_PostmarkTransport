@@ -1,6 +1,7 @@
 <?php
 namespace rcrowe\Swift\Transport;
 
+use Swift_Transport
 use Swift_Events_EventListener;
 use Swift_Mime_HeaderSet;
 use Swift_Mime_Message;
@@ -27,7 +28,7 @@ use Swift_TransportException;
  *    $mailer->send($message);
  * </code>
  */
-class Postmark implements \Swift_Transport
+class Postmark implements Swift_Transport
 {
     /**
      * @var string
@@ -37,14 +38,14 @@ class Postmark implements \Swift_Transport
     /**
      * @var string
      */
-    protected $postmark_api_token = NULL;
+    protected $postmark_api_token = null;
 
     /**
      * @var array
      */
     protected $IGNORED_HEADERS = array(
         'Content-Type',
-        'Date'
+        'Date',
     );
 
     /**
@@ -52,7 +53,7 @@ class Postmark implements \Swift_Transport
      */
     protected $UNSUPPORTED_HEADERS = array(
         'Bcc',
-        'Cc'
+        'Cc',
     );
 
     /**
@@ -60,19 +61,23 @@ class Postmark implements \Swift_Transport
      * @param string|array $from Postmark sender signature email
      * @param string $postmark_uri Postmark HTTP service URI
      */
-    public function __construct($postmark_api_token, $from = NULL, $postmark_uri = NULL)
+    public function __construct($postmark_api_token, $from = null, $postmark_uri = null)
     {
         $this->postmark_api_token      = $postmark_api_token;
         $this->postmark_uri            = is_null($postmark_uri) ? self::POSTMARK_URI : $postmark_uri;
         $this->postmark_from_signature = $from;
     }
 
-    public static function newInstance($postmark_api_token, $from = NULL, $postmark_uri = NULL)
+    public static function newInstance($postmark_api_token, $from = null, $postmark_uri = null)
     {
         return new self($postmark_api_token, $from, $postmark_uri);
     }
 
-    public function isStarted() { return FALSE; }
+    public function isStarted()
+    {
+        return false;
+    }
+    
     public function start() { }
     public function stop() { }
 
@@ -83,12 +88,10 @@ class Postmark implements \Swift_Transport
      */
     protected function getMIMEPart(Swift_Mime_Message $message, $mime_type)
     {
-        $html_part = NULL;
+        $html_part = null;
 
-        foreach ($message->getChildren() as $part)
-        {
-            if (strpos($part->getContentType(), 'text/html') === 0)
-            {
+        foreach ($message->getChildren() as $part) {
+            if (strpos($part->getContentType(), 'text/html') === 0) {
                 $html_part = $part;
             }
         }
@@ -103,15 +106,12 @@ class Postmark implements \Swift_Transport
      */
     protected function processHeaders(Swift_Mime_Headerset $headers)
     {
-        foreach ($this->IGNORED_HEADERS as $header_name)
-        {
+        foreach ($this->IGNORED_HEADERS as $header_name) {
             $headers->remove($header_name);
         }
 
-        foreach ($this->UNSUPPORTED_HEADERS as $header_name)
-        {
-            if ($headers->has($header_name))
-            {
+        foreach ($this->UNSUPPORTED_HEADERS as $header_name) {
+            if ($headers->has($header_name)) {
                 throw new Swift_TransportException(
                     "Postmark does not support the '{$header_name}' header"
                 );
@@ -144,31 +144,27 @@ class Postmark implements \Swift_Transport
         $reply_to = array();
 
         if (is_array($message->getReplyTo())) {
-            foreach ($message->getReplyTo() as $email => $name)
-            {
+            foreach ($message->getReplyTo() as $email => $name) {
                 $reply_to[] = ($name !== NULL) ? sprintf("%s <%s>", $name, $email) : $email;
             }
         }
 
         $message_data['ReplyTo'] = implode(',', $reply_to);
 
-        if (!is_null($html_part = $this->getMIMEPart($message, 'text/html')))
-        {
+        if (!is_null($html_part = $this->getMIMEPart($message, 'text/html'))) {
             $message_data['HtmlBody'] = $html_part->getBody();
         }
 
         $extra_headers = array();
 
-        foreach ($headers as $header)
-        {
+        foreach ($headers as $header) {
             $extra_headers[] = array(
                 'Name'  => $header->getFieldName(),
                 'Value' => $header->getFieldBody(),
             );
         }
 
-        if (!empty($extra_headers))
-        {
+        if (!empty($extra_headers)) {
             $message_data['Headers'] = $extra_headers;
         }
 
@@ -183,7 +179,7 @@ class Postmark implements \Swift_Transport
         return array(
             'Accept: application/json',
             'Content-Type: application/json',
-            'X-Postmark-Server-Token: ' . $this->postmark_api_token
+            'X-Postmark-Server-Token: ' . $this->postmark_api_token,
         );
     }
 
@@ -197,22 +193,21 @@ class Postmark implements \Swift_Transport
 
         curl_setopt_array($curl, array(
             CURLOPT_URL            => self::POSTMARK_URI,
-            CURLOPT_POST           => TRUE,
+            CURLOPT_POST           => true,
             CURLOPT_HTTPHEADER     => $this->headers(),
             CURLOPT_POSTFIELDS     => json_encode($message_data),
-            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_RETURNTRANSFER => true,
         ));
 
         $response = curl_exec($curl);
 
-        if ($response === FALSE)
-        {
+        if ($response === false) {
             $this->fail('Postmark delivery failed: ' . curl_error($curl));
         }
 
         $response_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        return array($response_code, @json_decode($response, TRUE));
+        return array($response_code, @json_decode($response, true));
     }
 
     protected function fail($message)
@@ -225,10 +220,9 @@ class Postmark implements \Swift_Transport
      * @param array $failed_recipients
      * @return int
      */
-    public function send(Swift_Mime_Message $message, &$failed_recipients = NULL)
+    public function send(Swift_Mime_Message $message, &$failed_recipients = null)
     {
-        if (!is_null($this->postmark_from_signature))
-        {
+        if (!is_null($this->postmark_from_signature)) {
             $message->setFrom($this->postmark_from);
         }
 
@@ -239,22 +233,19 @@ class Postmark implements \Swift_Transport
         $recipients = $message->getHeaders()->get('To');
         $addresses  = $recipients->getAddresses();
 
-        foreach ($recipients->getNameAddressStrings() as $i => $recipient)
-        {
+        foreach ($recipients->getNameAddressStrings() as $i => $recipient) {
+            
             $message_data['To']             = $recipient;
             list($response_code, $response) = $this->post($message_data);
 
-            if ($response_code != 200)
-            {
+            if ($response_code != 200) {
                 $failed_recipients[] = $addresses[$i];
 
                 $this->fail(
                     "Postmark delivery failed with HTTP status code {$response_code}. " .
                     "Postmark said: '{$response['Message']}'"
                 );
-            }
-            else
-            {
+            } else {
                 $send_count++;
             }
         }
