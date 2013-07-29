@@ -1,6 +1,7 @@
 {
     "name": "rcrowe/swift_postmark-transport",
     "description": "Send emails with SwiftMailer using Postmark as the transport",
+    "license": "BSD-3-Clause",
     "homepage": "https://github.com/rcrowe/Swift_PostmarkTransport",
     "keywords": ["swiftmailer", "postmark", "email"],
     "authors": [
@@ -17,6 +18,8 @@
         "swiftmailer/swiftmailer": "4.2.*"
     },
     "autoload": {
-        "files": ["src/Swift/Transport/Postmark.php"]
+        "psr-0": {
+            "rcrowe\\Swift": "src"
+        }
     }
 }
